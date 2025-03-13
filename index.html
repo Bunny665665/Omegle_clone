@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omegle Clone</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #chat { display: none; border: 1px solid #000; padding: 10px; margin-top: 20px; }
+        #messages { height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Random Chat</h1>
+    <button id="startChat">Start Chat</button>
+    
+    <div id="chat">
+        <p id="status">Waiting for a stranger...</p>
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button id="sendMessage">Send</button>
+    </div>
+    
+    <script>
+        const socket = io('http://localhost:3000');
+        const startChatBtn = document.getElementById('startChat');
+        const chatDiv = document.getElementById('chat');
+        const statusText = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+
+        startChatBtn.addEventListener('click', () => {
+            chatDiv.style.display = 'block';
+            startChatBtn.style.display = 'none';
+        });
+
+        socket.on('chat_start', (data) => {
+            statusText.innerText = data.message;
+        });
+
+        socket.on('message', (data) => {
+            const msg = document.createElement('p');
+            msg.innerText = "Stranger: " + data;
+            messagesDiv.appendChild(msg);
+        });
+
+        sendMessageBtn.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message.trim()) {
+                socket.emit('message', message);
+                const msg = document.createElement('p');
+                msg.innerText = "You: " + message;
+                messagesDiv.appendChild(msg);
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
